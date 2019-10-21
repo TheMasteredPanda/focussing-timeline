@@ -86,77 +86,96 @@ let timeEntries = {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  let yearKeys = Object.keys(timeEntries).reverse();
-  let timeline = document.getElementsByClassName("timeline")[0];
-  let timelineLine = document.getElementsByClassName("timeline_line")[0];
-
-  for (const yearKey in yearKeys) {
-    if (yearKeys.hasOwnProperty(yearKey)) {
-      const year = yearKeys[yearKey];
-      let yearElement = document.createElement("li");
-      yearElement.innerHTML = year;
-      yearElement.setAttribute("id", `${year}yearElement`);
-      yearElement.addEventListener("click", () => onClick(true, yearElement));
-      timeline.appendChild(yearElement);
-    }
-  }
-
-  let computedTimelineStyle = window.getComputedStyle(timeline);
-  timelineLine.style.width = computedTimelineStyle.width;
+  populateTimeline(true);
+  // let yearKeys = Object.keys(timeEntries).reverse();
+  // let timeline = document.getElementById("entries");
+  // let timelineLine = document.getElementById("timelineLine");
+  // for (const yearKey in yearKeys) {
+  //   if (yearKeys.hasOwnProperty(yearKey)) {
+  //     const year = yearKeys[yearKey];
+  //     let yearElement = document.createElement("li");
+  //     yearElement.innerHTML = year;
+  //     yearElement.setAttribute("id", `${year}yearElement`);
+  //     yearElement.classList.add("entry_spacing");
+  //     yearElement.addEventListener("click", () => onClick(true, yearElement));
+  //     timeline.appendChild(yearElement);
+  //   }
+  // }
+  // let computedTimelineStyle = window.getComputedStyle(timeline);
+  // timelineLine.style.width = computedTimelineStyle.width;
 });
+
+function populateTimeline(withYears) {
+  let timeline = document.getElementById("entries");
+  let timelineLine = document.getElementById("timelineLine");
+  clearTimeline([]);
+
+  if (withYears) {
+    let keys = Object.keys(timeEntries).reverse();
+    console.log(keys.length);
+
+    for (const yearKey in keys) {
+      if (keys.hasOwnProperty(yearKey)) {
+        const year = keys[yearKey];
+        let element = document.createElement("li");
+        element.innerHTML = year;
+        element.setAttribute("id", `${year}yearElement`);
+        element.classList.add("entry_spacing");
+        element.addEventListener("click", () => onClick(true, element));
+        timeline.appendChild(element);
+      }
+    }
+
+    recomputeTimelineLine();
+    focussed.year = false;
+  } else {
+  }
+}
+
+// document.getElementById("timelineBackButton").addEventListener("click", () => {
+//   if (focussed.year) {
+//   }
+// });
 
 function onClick(year, element) {
   let timeline = document.getElementsByClassName("timeline")[0];
   let timelineLine = document.getElementsByClassName("timeline_line")[0];
   let timelineWrapper = document.getElementsByClassName("timeline_wrapper")[0];
   if (year) {
-    console.log("Is year.");
     if (focussed.year) return;
-    console.log("No year focus.");
     let yearElement = element;
     let proceedingYear = getPreceedingYear(Number(yearElement.innerHTML));
-    console.log(`Proceeding Year: ${proceedingYear}.`);
     let proceedingYearElement = isYearElement(proceedingYear);
     if (proceedingYearElement === null) {
-      console.log("Proceeding year is null.");
       let lastYearElement = document.createElement("li");
       lastYearElement.innerHTML = `${Number(yearElement.innerHTML) - 1}`;
       lastYearElement.setAttribute(
         "id",
         `${Number(yearElement.innerHTML) - 1}yearElement`
       );
-      timeline
-        .appendChild(lastYearElement);
+      timeline.appendChild(lastYearElement);
       proceedingYearElement = document.getElementById(
         `${Number(yearElement.innerHTML) - 1}yearElement`
       );
     }
 
-    if (proceedingYearElement !== undefined && proceedingYearElement !== null) {
-      console.log("Got proceeding element.");
-    }
-
     clearTimeline([yearElement, proceedingYearElement]);
-    timeline.style.width = "90%";
-    timeline.style.marginLeft = '5%';
-    timeline.style.marginRight = '5%'
-    timelineLine.style.width = "1200px";
-    timelineLine.style.marginLeft = '10%';
-    timelineLine.style.marginRight = '5%';
-    timelineWrapper.style.overflow = 'hidden';
-    proceedingYearElement.style.marginLeft = '1180px';
-
+    timeline.classList.remove("timeline_unfocussed");
+    timeline.classList.add("timeline_focussed");
+    timelineLine.removeAttribute("style");
+    timelineLine.classList.add("timeline_line_focussed");
+    proceedingYearElement.classList.remove("entry_spacing");
+    proceedingYearElement.classList.add("proceeding_year");
+    focussed.year = true;
   } else {
     if (focussed.month) return;
   }
 }
 
 function recomputeTimelineLine() {
-  let timelineLine = document.getElementsByClassName("timeline_line")[0];
-  let computed = window.getComputedStyle(timelineLine);
-  timelineLine.style.width = document.getElementsByClassName(
-    "timeline"
-  )[0].style.width;
+  let timeline = document.getElementById('entries');
+  let computedTimeline = window.getComputedStyle(timeline);
+  document.getElementById('timelineLine').style.width = computedTimeline.width;
 }
 
 /**
